@@ -144,3 +144,32 @@ try:
     print("Redis cache enabled")
 except Exception as e:
     print(f"Redis not available, using LocMemCache: {e}")
+
+# === REDIS КЭШИРОВАНИЕ ===
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
+    }
+}
+
+try:
+    import redis
+
+    REDIS_URL = "redis://localhost:6379/1"
+    redis_client = redis.from_url(REDIS_URL)
+    redis_client.ping()
+
+    CACHES["default"] = {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_URL,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "PICKLE_VERSION": 4,
+        },
+        "KEY_PREFIX": "hotel",
+        "TIMEOUT": 3600,
+    }
+    print("Redis cache enabled")
+except Exception as e:
+    print(f"Redis not available, using LocMemCache: {e}")
