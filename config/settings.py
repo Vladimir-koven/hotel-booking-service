@@ -1,11 +1,14 @@
+from datetime import timedelta
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-dev-key"
+# === БЕЗОПАСНОСТЬ ===
+SECRET_KEY = "django-insecure-dev-key-please-change-in-production"
 DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
+# === ПРИЛОЖЕНИЯ ===
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -14,10 +17,14 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "rest_framework_simplejwt",
+    "corsheaders",
     "apps.rooms.apps.RoomsConfig",
     "apps.bookings.apps.BookingsConfig",
+    "apps.users.apps.UsersConfig",
 ]
 
+# === MIDDLEWARE ===
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -48,6 +55,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
+# === БАЗА ДАННЫХ ===
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -55,6 +63,7 @@ DATABASES = {
     }
 }
 
+# === ВАЛИДАЦИЯ ПАРОЛЕЙ ===
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -70,6 +79,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# === ИНТЕРНАЦИОНАЛИЗАЦИЯ ===
 LANGUAGE_CODE = "ru-ru"
 TIME_ZONE = "Europe/Moscow"
 USE_I18N = True
@@ -78,7 +88,23 @@ USE_TZ = True
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# === JWT НАСТРОЙКИ ===
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": False,
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+# === DRF НАСТРОЙКИ ===
 REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticatedOrReadOnly",),
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
     ],
@@ -87,4 +113,34 @@ REST_FRAMEWORK = {
         "rest_framework.parsers.FormParser",
         "rest_framework.parsers.MultiPartParser",
     ],
+    "EXCEPTION_HANDLER": "utils.exceptions.custom_exception_handler",
 }
+
+# === REDIS КЭШИРОВАНИЕ ===
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
+    }
+}
+
+try:
+    import redis
+
+    REDIS_URL = "redis://localhost:6379/1"
+    redis_client = redis.from_url(REDIS_URL)
+    redis_client.ping()
+
+    CACHES["default"] = {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_URL,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "PICKLE_VERSION": 4,
+        },
+        "KEY_PREFIX": "hotel",
+        "TIMEOUT": 3600,
+    }
+    print("Redis cache enabled")
+except Exception as e:
+    print(f"Redis not available, using LocMemCache: {e}")
