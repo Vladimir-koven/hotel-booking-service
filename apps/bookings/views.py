@@ -1,5 +1,6 @@
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
 from utils.logger import logger
@@ -11,6 +12,7 @@ controller = BookingController()
 
 
 @api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def create_booking(request):
     """Создание брони"""
     logger.info(f"POST /bookings/create - Данные: {request.data}")
@@ -30,6 +32,7 @@ def create_booking(request):
 
 
 @api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
 def delete_booking(request, booking_id):
     """Удаление брони"""
     logger.info(f"DELETE /bookings/delete/{booking_id}")
@@ -44,6 +47,7 @@ def delete_booking(request, booking_id):
 
 
 @api_view(["GET"])
+@permission_classes([IsAuthenticatedOrReadOnly])
 def list_bookings(request):
     """Список броней"""
     room_id = request.GET.get("room_id")
