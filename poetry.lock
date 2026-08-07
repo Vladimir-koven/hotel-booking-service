@@ -18,24 +18,24 @@ tests = ["pytest", "pytest-asyncio"]
 
 [[package]]
 name = "django"
-version = "6.1"
+version = "5.2.17"
 description = "A high-level Python web framework that encourages rapid development and clean, pragmatic design."
 optional = false
-python-versions = ">=3.12"
+python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "django-6.1-py3-none-any.whl", hash = "sha256:6c132cd980c9392b06807d4ca52d72530d631dc65a85d9dacede00a780cefbbe"},
-    {file = "django-6.1.tar.gz", hash = "sha256:86a2aacd59b817e4d6ac2ebfe22356c58f66f7b24e503f71b7c2fead677ee48b"},
+    {file = "django-5.2.17-py3-none-any.whl", hash = "sha256:f04fb3b36ee119e1af4fa1d397d5fd6cf12700f49321e84d4f4c642c5b1973db"},
+    {file = "django-5.2.17.tar.gz", hash = "sha256:9d4d93be539a18ab80d058eb515900e10951e04c537c5a6b394fc49528d3251f"},
 ]
 
 [package.dependencies]
-asgiref = ">=3.9.1"
-sqlparse = ">=0.5.0"
+asgiref = ">=3.8.1"
+sqlparse = ">=0.3.1"
 tzdata = {version = "*", markers = "sys_platform == \"win32\""}
 
 [package.extras]
-argon2 = ["argon2-cffi (>=23.1.0)"]
-bcrypt = ["bcrypt (>=4.1.1)"]
+argon2 = ["argon2-cffi (>=19.1.0)"]
+bcrypt = ["bcrypt"]
 
 [[package]]
 name = "djangorestframework"
@@ -83,5 +83,5 @@ files = [
 
 [metadata]
 lock-version = "2.1"
-python-versions = "^3.12"
-content-hash = "b499863bbb07a328cc1af74b2aeeb6a5300178fb8515f1bbf46f4481d494124c"
+python-versions = ">=3.11,<3.12"
+content-hash = "118fabc2d9ec8b407ef68c4b3681d4c65e7850ac5d324f075cd25c89c8f7809d"
