@@ -6,6 +6,10 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
       - id: check-added-large-files
+      - id: check-json
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: detect-private-key
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.16.0
@@ -20,3 +24,4 @@ repos:
       - id: mypy
         args: [--ignore-missing-imports]
         additional_dependencies: [django-stubs, pydantic]
+        exclude: ^tests/|^migrations/
