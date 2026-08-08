@@ -1,12 +1,55 @@
 from datetime import timedelta
 from pathlib import Path
 
+from decouple import config
+import dj_database_url
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-dev-key-please-change-in-production"
-DEBUG = True
-ALLOWED_HOSTS = ["*"]
+# === БЕЗОПАСНОСТЬ ===
+SECRET_KEY = config("SECRET_KEY", default="django-insecure-dev-key-please-change-in-production")
+DEBUG = config("DEBUG", default=True, cast=bool)
+ALLOWED_HOSTS: list[str] = config("ALLOWED_HOSTS", default="localhost,127.0.0.1").split(",")
 
+# === БАЗА ДАННЫХ ===
+DATABASE_URL = config("DATABASE_URL", default="sqlite:///db.sqlite3")
+
+if DATABASE_URL.startswith("postgres"):
+    DATABASES = {"default": dj_database_url.parse(DATABASE_URL)}
+    DATABASES["default"].update(
+        {
+            "CONN_MAX_AGE": 600,
+            "OPTIONS": {
+                "connect_timeout": 10,
+            },
+        }
+    )
+    print("PostgreSQL database configured")
+elif DATABASE_URL.startswith("sqlite"):
+    import re
+
+    match = re.search(r"sqlite:///(.+)", DATABASE_URL)
+    db_path = match.group(1) if match else "db.sqlite3"
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / db_path,
+        }
+    }
+    print("SQLite database configured")
+else:
+    raise ValueError(f"Unsupported database URL: {DATABASE_URL}")
+
+# === PRODUCTION CHECKS ===
+if not DEBUG:
+    if SECRET_KEY == "django-insecure-dev-key-please-change-in-production":
+        raise ValueError("SECRET_KEY must be changed in production!")
+    if "*" in ALLOWED_HOSTS:
+        raise ValueError("ALLOWED_HOSTS cannot contain '*' in production!")
+
+print(f"Application running in {'DEVELOPMENT' if DEBUG else 'PRODUCTION'} mode")
+
+# === ПРИЛОЖЕНИЯ ===
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -52,13 +95,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
-
+# === ВАЛИДАЦИЯ ПАРОЛЕЙ ===
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -74,6 +111,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# === ИНТЕРНАЦИОНАЛИЗАЦИЯ ===
 LANGUAGE_CODE = "ru-ru"
 TIME_ZONE = "Europe/Moscow"
 USE_I18N = True
@@ -82,6 +120,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# === JWT ===
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
@@ -92,6 +131,7 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
+# === DRF ===
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -108,6 +148,7 @@ REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "utils.exceptions.custom_exception_handler",
 }
 
+# === REDIS ===
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
@@ -118,7 +159,7 @@ CACHES = {
 try:
     import redis
 
-    REDIS_URL = "redis://localhost:6379/1"
+    REDIS_URL = config("REDIS_URL", default="redis://localhost:6379/1")
     redis_client = redis.from_url(REDIS_URL)
     redis_client.ping()
 
