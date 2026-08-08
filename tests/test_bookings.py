@@ -72,8 +72,8 @@ class BookingsAPITestCase(TestCase):
             "date_end": (date.today() + timedelta(days=5)).isoformat(),
         }
         response = self.client.post(url, data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("Номер не найден", str(response.data))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertIn("error", response.data)
 
     def test_delete_booking(self):
         """Удаление брони"""

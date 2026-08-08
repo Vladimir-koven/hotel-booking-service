@@ -19,7 +19,7 @@ class BookingController:
             room = Room.objects.get(id=data.get("room_id"), is_active=True)
         except Room.DoesNotExist as e:
             logger.warning(f"Номер {data.get('room_id')} не найден")
-            raise ValidationError("Номер не найден") from e
+            raise Room.DoesNotExist(f"Номер {data.get('room_id')} не найден") from e
 
         date_start = data.get("date_start")
         date_end = data.get("date_end")
@@ -51,15 +51,13 @@ class BookingController:
 
         try:
             booking = Booking.objects.get(id=booking_id)
-            booking.delete()
-            logger.success(f"Бронь {booking_id} удалена")
-            return True
         except Booking.DoesNotExist as e:
             logger.warning(f"Бронь {booking_id} не найдена")
-            raise ValidationError("Бронь не найдена") from e
-        except Exception as e:
-            logger.error(f"Ошибка удаления брони {booking_id}: {e}")
-            raise
+            raise Booking.DoesNotExist(f"Бронь {booking_id} не найдена") from e
+
+        booking.delete()
+        logger.success(f"Бронь {booking_id} удалена")
+        return True
 
     @staticmethod
     def get_bookings_list(room_id):
@@ -70,7 +68,7 @@ class BookingController:
             room = Room.objects.get(id=room_id, is_active=True)
         except Room.DoesNotExist as e:
             logger.warning(f"Номер {room_id} не найден")
-            raise ValidationError("Номер не найден") from e
+            raise Room.DoesNotExist(f"Номер {room_id} не найден") from e
 
         bookings = Booking.objects.filter(room=room).order_by("date_start")
         logger.info(f"Найдено {bookings.count()} броней для номера {room_id}")

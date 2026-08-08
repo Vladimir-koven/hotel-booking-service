@@ -22,13 +22,9 @@ def create_room(request):
         logger.warning(f"Ошибка валидации: {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    try:
-        room = controller.create_room(serializer.validated_data)
-        logger.success(f"Номер успешно создан: {room.id}")
-        return Response({"room_id": room.id}, status=status.HTTP_201_CREATED)
-    except Exception as e:
-        logger.error(f"Ошибка создания номера: {e}")
-        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    room = controller.create_room(serializer.validated_data)
+    logger.success(f"Номер успешно создан: {room.id}")
+    return Response({"room_id": room.id}, status=status.HTTP_201_CREATED)
 
 
 @api_view(["DELETE"])
@@ -37,13 +33,9 @@ def delete_room(request, room_id):
     """Удаление номера"""
     logger.info(f"DELETE /rooms/delete/{room_id}")
 
-    try:
-        controller.delete_room(room_id)
-        logger.success(f"Номер {room_id} удален")
-        return Response({"message": "Room deleted"}, status=status.HTTP_200_OK)
-    except Exception as e:
-        logger.error(f"Ошибка удаления номера {room_id}: {e}")
-        return Response({"error": str(e)}, status=status.HTTP_404_NOT_FOUND)
+    controller.delete_room(room_id)
+    logger.success(f"Номер {room_id} удален")
+    return Response({"message": "Room deleted"}, status=status.HTTP_200_OK)
 
 
 @api_view(["GET"])

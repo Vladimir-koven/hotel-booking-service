@@ -31,17 +31,15 @@ class RoomController:
         logger.info(f"Удаление номера ID: {room_id}")
         try:
             room = Room.objects.get(id=room_id, is_active=True)
-            bookings_count = Booking.objects.filter(room=room).count()
-            Booking.objects.filter(room=room).delete()
-            room.soft_delete()
-            logger.success(f"Номер {room_id} удален, удалено броней: {bookings_count}")
-            return True
         except Room.DoesNotExist as e:
             logger.warning(f"Номер {room_id} не найден")
-            raise ValidationError("Номер не найден") from e
-        except Exception as e:
-            logger.error(f"Ошибка удаления номера {room_id}: {e}")
-            raise
+            raise Room.DoesNotExist(f"Номер {room_id} не найден") from e
+
+        bookings_count = Booking.objects.filter(room=room).count()
+        Booking.objects.filter(room=room).delete()
+        room.soft_delete()
+        logger.success(f"Номер {room_id} удален, удалено броней: {bookings_count}")
+        return True
 
     @staticmethod
     def get_rooms_list(filters=None):
