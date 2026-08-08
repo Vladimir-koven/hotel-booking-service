@@ -14,7 +14,6 @@ controller = BookingController()
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_booking(request):
-    """Создание брони"""
     logger.info(f"POST /bookings/create - Данные: {request.data}")
 
     serializer = BookingCreateSerializer(data=request.data)
@@ -30,7 +29,6 @@ def create_booking(request):
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])
 def delete_booking(request, booking_id):
-    """Удаление брони"""
     logger.info(f"DELETE /bookings/delete/{booking_id}")
 
     controller.delete_booking(booking_id)
@@ -41,7 +39,6 @@ def delete_booking(request, booking_id):
 @api_view(["GET"])
 @permission_classes([IsAuthenticatedOrReadOnly])
 def list_bookings(request):
-    """Список броней"""
     room_id = request.GET.get("room_id")
     if not room_id:
         logger.warning("GET /bookings/list - Отсутствует параметр room_id")

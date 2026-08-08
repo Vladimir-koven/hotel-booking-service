@@ -14,7 +14,6 @@ controller = RoomController()
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_room(request):
-    """Создание номера"""
     logger.info(f"POST /rooms/create - Данные: {request.data}")
 
     serializer = RoomCreateSerializer(data=request.data)
@@ -30,7 +29,6 @@ def create_room(request):
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])
 def delete_room(request, room_id):
-    """Удаление номера"""
     logger.info(f"DELETE /rooms/delete/{room_id}")
 
     controller.delete_room(room_id)
@@ -41,7 +39,6 @@ def delete_room(request, room_id):
 @api_view(["GET"])
 @permission_classes([IsAuthenticatedOrReadOnly])
 def list_rooms(request):
-    """Список номеров"""
     filters = {
         "sort_by": request.GET.get("sort_by", "created_at"),
         "order": request.GET.get("order", "desc"),
