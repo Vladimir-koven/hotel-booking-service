@@ -20,8 +20,11 @@ COPY pyproject.toml poetry.lock* /app/
 
 RUN poetry install --only main --no-interaction --no-ansi
 
+RUN pip install --no-cache-dir uvicorn gunicorn
+
 COPY . /app
 
 EXPOSE 8000
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+CMD ["python", "-m", "uvicorn", "config.asgi:application", "--host", "0.0.0.0", "--port", "8000", "--workers", "3"]
